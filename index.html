@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MTB Rider">
+<meta name="theme-color" content="#070911">
+<title>MTB Rider</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #1060CC;
+  --blue-bright: #2D7FEF;
+  --blue-dim: rgba(16,96,204,0.18);
+  --blue-text: #7ab4ff;
+  --bg: #070911;
+  --bg2: #0c1020;
+  --bg3: #101525;
+  --line: rgba(16,96,204,0.2);
+  --line2: rgba(255,255,255,0.06);
+  --text: #ffffff;
+  --text2: rgba(255,255,255,0.55);
+  --text3: rgba(255,255,255,0.25);
+  --safe-top: env(safe-area-inset-top, 44px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+  --red: #EF4444;
+  --amber: #F59E0B;
+  --green: #10B981;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%; height: -webkit-fill-available;
+  font-family: 'Barlow', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%; height: -webkit-fill-available;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+.safe-top { height: var(--safe-top); background: var(--bg); flex-shrink: 0; }
+
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.screen::-webkit-scrollbar { display: none; }
+
+/* NAV */
+.nav {
+  flex-shrink: 0;
+  display: flex;
+  background: rgba(7,9,17,0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 0.5px solid var(--line);
+  padding-bottom: var(--safe-bottom);
+}
+.nb {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 0 8px;
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 10px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nb svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.nb.active { color: var(--blue-text); }
+.nb-plus svg {
+  background: var(--blue);
+  border-radius: 50%;
+  padding: 6px;
+  width: 36px; height: 36px;
+  stroke: white;
+}
+.nb-plus.active svg, .nb-plus svg { color: white; }
+.nb-indicator { width: 16px; height: 2px; background: var(--blue); border-radius: 1px; margin-top: 1px; opacity: 0; transition: opacity 0.2s; }
+.nb.active .nb-indicator { opacity: 1; }
+
+/* VIEWS */
+.view { display: none; animation: fadeIn 0.2s ease; }
+.view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── SHARED COMPONENTS ── */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 18px 16px;
+}
+.topbar-left {}
+.page-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+.page-sub { color: var(--text3); font-size: 12px; font-weight: 500; margin-top: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
+.logo-mark { width: 40px; height: 40px; background: var(--blue-dim); border: 0.5px solid var(--line); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+
+.section { padding: 0 18px; margin-bottom: 20px; }
+.sec-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+
+/* HERO CARD */
+.hero-card {
+  margin: 0 18px 16px;
+  background: var(--bg2);
+  border: 0.5px solid var(--blue);
+  border-radius: 20px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 140px; height: 140px;
+  background: rgba(16,96,204,0.12);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero-card::after {
+  content: '';
+  position: absolute;
+  bottom: -20px; left: 30px;
+  width: 80px; height: 80px;
+  background: rgba(16,96,204,0.06);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero-label { color: var(--blue-text); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.hero-num { font-family: 'Barlow Condensed', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -2px; line-height: 1; color: #fff; }
+.hero-unit { font-size: 20px; font-weight: 500; color: var(--text2); margin-left: 4px; }
+.hero-sub { color: var(--text3); font-size: 12px; margin-top: 6px; font-weight: 500; }
+.hero-sub b { color: var(--blue-text); font-weight: 600; }
+.progress-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; margin-top: 14px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--blue-bright); border-radius: 2px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+
+/* STAT GRID */
+.stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+.stat-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--line2);
+  border-radius: 16px;
+  padding: 14px;
+  transition: border-color 0.2s;
+}
+.stat-card.hl { border-color: var(--line); }
+.stat-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); margin-bottom: 8px; }
+.stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+.stat-unit { font-size: 13px; font-weight: 500; color: var(--text2); margin-left: 2px; }
+.stat-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-top: 4px; }
+
+/* SESSION CARD */
+.sess-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--line2);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.sess-card:active { transform: scale(0.98); }
+.sess-card.today { border-color: var(--blue); }
+.sess-top { display: flex; justify-content: space-between; align-items: center; }
+.sess-name { font-size: 15px; font-weight: 600; }
+.badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge-hard { background: rgba(239,68,68,0.15); color: #fca5a5; }
+.badge-mid { background: rgba(16,96,204,0.2); color: var(--blue-text); }
+.badge-easy { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+.sess-stats { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+.ss { color: var(--text3); font-size: 12px; font-weight: 500; }
+.ss svg { width: 12px; height: 12px; stroke: var(--blue-text); vertical-align: -1px; margin-right: 3px; fill: none; stroke-width: 2; stroke-linecap: round; }
+.sess-bar { height: 2px; background: rgba(255,255,255,0.05); border-radius: 1px; margin-top: 12px; overflow: hidden; }
+.sess-fill { height: 100%; background: var(--blue); border-radius: 1px; }
+
+/* ZONA FC */
+.fc-zones { display: flex; gap: 3px; height: 5px; border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+.fz { border-radius: 2px; }
+.fc-labels { display: flex; justify-content: space-between; }
+.fc-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* NUTRICIÓN */
+.ring-container { display: flex; justify-content: center; padding: 8px 0; }
+.macro-strip { display: flex; justify-content: space-around; padding: 0 18px 16px; }
+.macro-item { text-align: center; }
+.macro-dot { width: 6px; height: 6px; border-radius: 50%; margin: 0 auto 5px; }
+.macro-val { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.macro-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+.meal-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--line2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.meal-card:active { transform: scale(0.98); }
+.meal-name { font-size: 14px; font-weight: 500; }
+.meal-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.meal-kcal { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; color: var(--blue-text); }
+.meal-add { border-color: var(--line); background: rgba(16,96,204,0.05); }
+.meal-add .meal-name { color: var(--blue-text); }
+
+/* WATER */
+.water-card { background: var(--bg2); border: 0.5px solid var(--line2); border-radius: 16px; padding: 16px; }
+.water-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.water-val { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: var(--blue-text); }
+.water-track { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
+.water-fill { height: 100%; background: var(--blue-bright); border-radius: 3px; transition: width 0.4s; }
+.water-btns { display: flex; gap: 8px; }
+.water-btn { flex: 1; background: var(--bg3); border: 0.5px solid var(--line2); border-radius: 10px; color: var(--text2); padding: 9px 0; font-size: 13px; font-weight: 600; font-family: 'Barlow', sans-serif; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+.water-btn:active { border-color: var(--blue); color: var(--blue-text); }
+
+/* FORM */
+.form-wrap { padding: 0 18px 24px; }
+.flabel { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; display: block; }
+.finput, .fselect, .ftextarea {
+  width: 100%;
+  background: var(--bg2);
+  border: 0.5px solid var(--line2);
+  border-radius: 12px;
+  padding: 13px 14px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: 'Barlow', sans-serif;
+  font-weight: 500;
+  margin-bottom: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.finput:focus, .fselect:focus, .ftextarea:focus { border-color: var(--blue); }
+.fselect option { background: #0c1020; }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.frow .finput { margin-bottom: 14px; }
+
+.feel-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.feel-btn {
+  flex: 1; padding: 10px 2px;
+  background: var(--bg2);
+  border: 0.5px solid var(--line2);
+  border-radius: 12px;
+  color: var(--text2);
+  font-size: 11px; font-weight: 600;
+  font-family: 'Barlow', sans-serif;
+  cursor: pointer; text-align: center;
+  transition: all 0.15s;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.feel-emoji { font-size: 20px; display: block; margin-bottom: 3px; }
+.feel-btn.sel { border-color: var(--blue); color: var(--blue-text); background: var(--blue-dim); }
+
+.btn-main {
+  width: 100%;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Barlow', sans-serif;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  text-transform: uppercase;
+}
+.btn-main:active { opacity: 0.8; transform: scale(0.98); }
+.save-ok {
+  display: none;
+  margin-top: 12px;
+  background: rgba(16,96,204,0.12);
+  border: 0.5px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  color: var(--blue-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* PROGRESO */
+.week-row { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 6px; margin-bottom: 20px; }
+.day { aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 8px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.day-done { background: var(--blue); color: #fff; }
+.day-today { background: var(--blue); color: #fff; outline: 2px solid var(--blue-text); outline-offset: 2px; }
+.day-partial { background: rgba(16,96,204,0.3); color: var(--blue-text); }
+.day-none { background: var(--bg2); color: var(--text3); }
+
+.prog-row {
+  background: var(--bg2);
+  border: 0.5px solid var(--line2);
+  border-radius: 14px;
+  padding: 13px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.prog-key { color: var(--text2); font-size: 14px; font-weight: 500; }
+.prog-val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; }
+.prog-val.blue { color: var(--blue-text); }
+
+.goal-card { background: var(--bg2); border: 0.5px solid var(--line); border-radius: 16px; padding: 16px; }
+.goal-row { margin-bottom: 14px; }
+.goal-row:last-child { margin-bottom: 0; }
+.goal-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.goal-name { font-size: 13px; font-weight: 500; color: var(--text2); }
+.goal-val { font-size: 13px; font-weight: 700; color: var(--blue-text); }
+.goal-track { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.goal-fill { height: 100%; border-radius: 2px; }
+
+/* SPLASH */
+.splash {
+  position: fixed; inset: 0; z-index: 999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+  transition: opacity 0.5s;
+}
+.splash-icon {
+  width: 80px; height: 80px;
+  background: var(--blue-dim);
+  border: 0.5px solid var(--blue);
+  border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+}
+.splash-name { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 1px; color: var(--blue-text); }
+.splash-sub { font-size: 13px; color: var(--text3); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: var(--bg2); border: 0.5px solid var(--blue);
+  color: var(--blue-text); padding: 10px 20px;
+  border-radius: 40px; font-size: 13px; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  z-index: 200; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+.pb { padding-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="splash-icon">🚵</div>
+  <div class="splash-name">MTB RIDER</div>
+  <div class="splash-sub">Entrenamiento · Nutrición</div>
+</div>
+
+<div class="app">
+  <div class="safe-top"></div>
+  <div class="screen" id="scr">
+
+    <!-- ════ INICIO ════ -->
+    <div class="view active" id="v-home">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="page-title">INICIO</div>
+          <div class="page-sub" id="home-date">Cargando...</div>
+        </div>
+        <div class="logo-mark">
+          <svg width="22" height="22" fill="none" stroke="#7ab4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5L8.7 7l-1.2 2.8H3"/><path d="M15 5l-3.3 5.5-3.2 7"/></svg>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-label">Kilómetros · Mayo</div>
+        <div>
+          <span class="hero-num" id="h-km">234</span>
+          <span class="hero-unit">km</span>
+        </div>
+        <div class="hero-sub">Objetivo <b>300 km</b> · 78% completado</div>
+        <div class="progress-track"><div class="progress-fill" id="h-prog" style="width:78%"></div></div>
+      </div>
+
+      <div class="section">
+        <div class="sec-label">Este mes</div>
+        <div class="stat-grid">
+          <div class="stat-card hl">
+            <div class="stat-dot"></div>
+            <div><span class="stat-val" id="h-dsn">4,230</span><span class="stat-unit">m</span></div>
+            <div class="stat-label">Desnivel</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-dot" style="background:var(--text3)"></div>
+            <div><span class="stat-val" id="h-hrs">18.5</span><span class="stat-unit">h</span></div>
+            <div class="stat-label">En silla</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-dot" style="background:var(--text3)"></div>
+            <div><span class="stat-val" id="h-fc">152</span><span class="stat-unit">bpm</span></div>
+            <div class="stat-label">FC media</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-dot" style="background:var(--text3)"></div>
+            <div><span class="stat-val" id="h-kcal">12.8k</span></div>
+            <div class="stat-label">Calorías</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-label">Sesión de hoy</div>
+        <div class="sess-card today" onclick="go('session')">
+          <div class="sess-top">
+            <div class="sess-name">Enduro Técnico</div>
+            <span class="badge badge-hard">Intenso</span>
+          </div>
+          <div class="sess-stats">
+            <span class="ss"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>2h 30m</span>
+            <span class="ss"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>22 km</span>
+            <span class="ss"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>680m</span>
+          </div>
+          <div class="sess-bar"><div class="sess-fill" style="width:65%"></div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-label">Próximas sesiones</div>
+        <div class="sess-card">
+          <div class="sess-top">
+            <div class="sess-name">Rodaje Zona 2</div>
+            <span class="badge badge-mid">Moderado</span>
+          </div>
+          <div class="sess-stats">
+            <span class="ss"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mañana</span>
+            <span class="ss"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>30 km</span>
+          </div>
+        </div>
+        <div class="sess-card">
+          <div class="sess-top">
+            <div class="sess-name">Recuperación activa</div>
+            <span class="badge badge-easy">Suave</span>
+          </div>
+          <div class="sess-stats">
+            <span class="ss"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Pasado</span>
+            <span class="ss"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>15 km</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section pb">
+        <div class="sec-label">Zona cardíaca · Objetivo hoy</div>
+        <div class="stat-card" style="border-color:var(--line)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-size:13px;font-weight:500;color:var(--text2)">FC objetivo</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--amber)">158 bpm · Z3</span>
+          </div>
+          <div class="fc-zones">
+            <div class="fz" style="flex:1;background:#3B82F6"></div>
+            <div class="fz" style="flex:1;background:#10B981"></div>
+            <div class="fz" style="flex:1.5;background:var(--amber);outline:2px solid rgba(245,158,11,0.4);outline-offset:1px"></div>
+            <div class="fz" style="flex:1;background:var(--red)"></div>
+            <div class="fz" style="flex:0.7;background:#7f1d1d"></div>
+          </div>
+          <div class="fc-labels">
+            <span class="fc-label" style="color:#3B82F6">Z1</span>
+            <span class="fc-label" style="color:#10B981">Z2</span>
+            <span class="fc-label" style="color:var(--amber)">Z3 ←</span>
+            <span class="fc-label" style="color:var(--red)">Z4</span>
+            <span class="fc-label" style="color:#7f1d1d">Z5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ NUTRICIÓN ════ -->
+    <div class="view" id="v-nutricion">
+      <div class="topbar">
+        <div>
+          <div class="page-title">NUTRICIÓN</div>
+          <div class="page-sub">1,840 / 2,600 kcal</div>
+        </div>
+        <svg width="26" height="26" fill="none" stroke="#7ab4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 2C6.5 2 3 5.5 3 10c0 3.9 2.6 7.1 6.1 8.3L12 22l2.9-3.7C18.4 17.1 21 13.9 21 10c0-4.5-3.5-8-8-8z"/></svg>
+      </div>
+
+      <div class="ring-container">
+        <svg width="170" height="170" viewBox="0 0 170 170">
+          <circle cx="85" cy="85" r="65" fill="none" stroke="#0c1020" stroke-width="18"/>
+          <circle cx="85" cy="85" r="65" fill="none" stroke="#1060CC" stroke-width="18"
+            stroke-dasharray="408" stroke-dashoffset="145" stroke-linecap="round" transform="rotate(-90 85 85)"/>
+          <circle cx="85" cy="85" r="65" fill="none" stroke="#EF4444" stroke-width="18"
+            stroke-dasharray="408" stroke-dashoffset="306" stroke-linecap="round" transform="rotate(126 85 85)"/>
+          <circle cx="85" cy="85" r="65" fill="none" stroke="#F59E0B" stroke-width="18"
+            stroke-dasharray="408" stroke-dashoffset="326" stroke-linecap="round" transform="rotate(215 85 85)"/>
+          <text x="85" y="79" text-anchor="middle" font-size="28" font-weight="700" fill="#fff" font-family="'Barlow Condensed',sans-serif" letter-spacing="-1">1,840</text>
+          <text x="85" y="97" text-anchor="middle" font-size="12" fill="rgba(255,255,255,0.35)" font-family="'Barlow',sans-serif" font-weight="600" letter-spacing="1">KCAL HOY</text>
+        </svg>
+      </div>
+
+      <div class="macro-strip">
+        <div class="macro-item">
+          <div class="macro-dot" style="background:#1060CC"></div>
+          <div class="macro-val">220g</div>
+          <div class="macro-label">Carbos</div>
+        </div>
+        <div class="macro-item">
+          <div class="macro-dot" style="background:#EF4444"></div>
+          <div class="macro-val">145g</div>
+          <div class="macro-label">Proteína</div>
+        </div>
+        <div class="macro-item">
+          <div class="macro-dot" style="background:#F59E0B"></div>
+          <div class="macro-val">48g</div>
+          <div class="macro-label">Grasa</div>
+        </div>
+        <div class="macro-item">
+          <div class="macro-dot" style="background:var(--text3)"></div>
+          <div class="macro-val" id="water-macro">2.4L</div>
+          <div class="macro-label">Agua</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-label">Comidas del día</div>
+        <div class="meal-card">
+          <div><div class="meal-name">Avena + plátano + whey</div><div class="meal-time">07:30 · Pre-entreno</div></div>
+          <div class="meal-kcal">520</div>
+        </div>
+        <div class="meal-card">
+          <div><div class="meal-name">Arroz + pollo + verduras</div><div class="meal-time">13:00 · Almuerzo</div></div>
+          <div class="meal-kcal">680</div>
+        </div>
+        <div class="meal-card">
+          <div><div class="meal-name">Fruta + frutos secos</div><div class="meal-time">16:00 · Merienda</div></div>
+          <div class="meal-kcal">340</div>
+        </div>
+        <div class="meal-card">
+          <div><div class="meal-name">Batido proteína + banana</div><div class="meal-time">19:30 · Post-entreno</div></div>
+          <div class="meal-kcal">300</div>
+        </div>
+        <div class="meal-card meal-add" onclick="toast('📝 Función próximamente')">
+          <div><div class="meal-name">+ Añadir comida</div><div class="meal-time">Registrar nueva ingesta</div></div>
+          <svg width="20" height="20" fill="none" stroke="#7ab4ff" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+      </div>
+
+      <div class="section pb">
+        <div class="sec-label">Hidratación</div>
+        <div class="water-card">
+          <div class="water-header">
+            <span style="font-size:13px;font-weight:500;color:var(--text2)">Agua hoy</span>
+            <span class="water-val" id="water-val">2.4 / 3.0 L</span>
+          </div>
+          <div class="water-track"><div class="water-fill" id="water-bar" style="width:80%"></div></div>
+          <div class="water-btns">
+            <button class="water-btn" onclick="addWater(250)">+250ml</button>
+            <button class="water-btn" onclick="addWater(500)">+500ml</button>
+            <button class="water-btn" onclick="addWater(750)">+750ml</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SESIÓN ════ -->
+    <div class="view" id="v-session">
+      <div class="topbar">
+        <div>
+          <div class="page-title">NUEVA SESIÓN</div>
+          <div class="page-sub">Registra tu salida</div>
+        </div>
+        <svg width="26" height="26" fill="none" stroke="#7ab4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5L8.7 7l-1.2 2.8H3"/><path d="M15 5l-3.3 5.5-3.2 7"/></svg>
+      </div>
+
+      <div class="form-wrap">
+        <label class="flabel">Tipo de sesión</label>
+        <select class="fselect" id="f-tipo">
+          <option value="enduro">🏔  Enduro / XC técnico</option>
+          <option value="z2">🔄  Rodaje Z2 · Fondo</option>
+          <option value="hiit">⚡  Intervalos / HIIT</option>
+          <option value="recovery">🧘  Recuperación activa</option>
+          <option value="race">🏁  Competición / Race</option>
+          <option value="climb">🪨  Subida específica</option>
+        </select>
+
+        <div class="frow">
+          <div>
+            <label class="flabel">Distancia (km)</label>
+            <input class="finput" type="number" inputmode="decimal" placeholder="22" id="f-km">
+          </div>
+          <div>
+            <label class="flabel">Duración (min)</label>
+            <input class="finput" type="number" inputmode="numeric" placeholder="150" id="f-min">
+          </div>
+        </div>
+        <div class="frow">
+          <div>
+            <label class="flabel">Desnivel (m)</label>
+            <input class="finput" type="number" inputmode="numeric" placeholder="680" id="f-dsn">
+          </div>
+          <div>
+            <label class="flabel">FC media (bpm)</label>
+            <input class="finput" type="number" inputmode="numeric" placeholder="158" id="f-fc">
+          </div>
+        </div>
+
+        <label class="flabel">Sensaciones</label>
+        <div class="feel-row">
+          <button class="feel-btn" onclick="feel(this,'mal')" data-v="mal"><span class="feel-emoji">😵</span>Mal</button>
+          <button class="feel-btn" onclick="feel(this,'regular')" data-v="regular"><span class="feel-emoji">😐</span>Regular</button>
+          <button class="feel-btn" onclick="feel(this,'bien')" data-v="bien"><span class="feel-emoji">💪</span>Bien</button>
+          <button class="feel-btn" onclick="feel(this,'epic')" data-v="epic"><span class="feel-emoji">🔥</span>Epic</button>
+        </div>
+
+        <label class="flabel">Notas (opcional)</label>
+        <textarea class="finput ftextarea" rows="3" placeholder="Terreno mojado, nuevo PB en subida norte..." id="f-notas"></textarea>
+
+        <button class="btn-main" onclick="saveSession()">GUARDAR SESIÓN</button>
+        <div class="save-ok" id="save-ok">✅ Sesión guardada correctamente</div>
+
+        <div style="margin-top:24px" id="hist-section">
+          <div class="sec-label">Últimas sesiones</div>
+          <div id="hist-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PROGRESO ════ -->
+    <div class="view" id="v-progreso">
+      <div class="topbar">
+        <div>
+          <div class="page-title">PROGRESO</div>
+          <div class="page-sub" id="prog-date">Mayo 2026</div>
+        </div>
+        <svg width="26" height="26" fill="none" stroke="#7ab4ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+
+      <div class="section">
+        <div class="sec-label">Semana actual</div>
+        <div class="week-row">
+          <div class="day day-done"><span>L</span><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="day day-done"><span>M</span><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="day day-today"><span>X</span><span style="font-size:10px">●</span></div>
+          <div class="day day-none"><span>J</span><span>—</span></div>
+          <div class="day day-none"><span>V</span><span>—</span></div>
+          <div class="day day-partial"><span>S</span><span>?</span></div>
+          <div class="day day-none"><span>D</span><span>—</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-label">Estadísticas del mes</div>
+        <div class="prog-row">
+          <span class="prog-key">Kilómetros totales</span>
+          <span class="prog-val blue" id="p-km">234 km</span>
+        </div>
+        <div class="prog-row">
+          <span class="prog-key">Desnivel acumulado</span>
+          <span class="prog-val blue" id="p-dsn">4,230 m</span>
+        </div>
+        <div class="prog-row">
+          <span class="prog-key">Horas de entreno</span>
+          <span class="prog-val blue" id="p-hrs">18.5 h</span>
+        </div>
+        <div class="prog-row">
+          <span class="prog-key">FC media global</span>
+          <span class="prog-val" id="p-fc">152 bpm</span>
+        </div>
+        <div class="prog-row">
+          <span class="prog-key">Calorías quemadas</span>
+          <span class="prog-val" id="p-kcal">12,840 kcal</span>
+        </div>
+        <div class="prog-row">
+          <span class="prog-key">Sesiones completadas</span>
+          <span class="prog-val blue" id="p-sess">11 / 14</span>
+        </div>
+      </div>
+
+      <div class="section pb">
+        <div class="sec-label">Objetivos del mes</div>
+        <div class="goal-card">
+          <div class="goal-row">
+            <div class="goal-header">
+              <span class="goal-name">Kilómetros</span>
+              <span class="goal-val">234 / 300 km</span>
+            </div>
+            <div class="goal-track"><div class="goal-fill" style="width:78%;background:var(--blue-bright)"></div></div>
+          </div>
+          <div class="goal-row">
+            <div class="goal-header">
+              <span class="goal-name">Sesiones</span>
+              <span class="goal-val" style="color:var(--amber)">11 / 14</span>
+            </div>
+            <div class="goal-track"><div class="goal-fill" style="width:79%;background:var(--amber)"></div></div>
+          </div>
+          <div class="goal-row">
+            <div class="goal-header">
+              <span class="goal-name">Desnivel</span>
+              <span class="goal-val" style="color:#6ee7b7">4,230 / 5,000 m</span>
+            </div>
+            <div class="goal-track"><div class="goal-fill" style="width:85%;background:var(--green)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screen -->
+
+  <nav class="nav">
+    <button class="nb active" id="nb-home" onclick="go('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Inicio</span>
+      <div class="nb-indicator"></div>
+    </button>
+    <button class="nb" id="nb-nutricion" onclick="go('nutricion')">
+      <svg viewBox="0 0 24 24"><path d="M11 2C6.5 2 3 5.5 3 10c0 3.9 2.6 7.1 6.1 8.3L12 22l2.9-3.7C18.4 17.1 21 13.9 21 10c0-4.5-3.5-8-8-8z"/></svg>
+      <span>Nutrición</span>
+      <div class="nb-indicator"></div>
+    </button>
+    <button class="nb nb-plus" id="nb-session" onclick="go('session')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Sesión</span>
+      <div class="nb-indicator"></div>
+    </button>
+    <button class="nb" id="nb-progreso" onclick="go('progreso')">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Progreso</span>
+      <div class="nb-indicator"></div>
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+const S = {
+  sessions: JSON.parse(localStorage.getItem('mtb_s') || '[]'),
+  water: parseFloat(localStorage.getItem('mtb_w') || '2.4'),
+  feel: null
+};
+
+// splash
+setTimeout(() => {
+  const s = document.getElementById('splash');
+  s.style.opacity = '0';
+  setTimeout(() => s.remove(), 500);
+}, 1500);
+
+// date
+const dn = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const mn = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const now = new Date();
+document.getElementById('home-date').textContent = `${dn[now.getDay()]} · Semana ${wk(now)}`;
+document.getElementById('prog-date').textContent = `${mn[now.getMonth()][0].toUpperCase()+mn[now.getMonth()].slice(1)} ${now.getFullYear()}`;
+function wk(d) {
+  const D = new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  D.setUTCDate(D.getUTCDate()+4-(D.getUTCDay()||7));
+  return Math.ceil(((D-new Date(Date.UTC(D.getUTCFullYear(),0,1)))/86400000+1)/7);
+}
+
+// nav
+function go(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
+  document.getElementById('v-'+name).classList.add('active');
+  document.getElementById('nb-'+name).classList.add('active');
+  document.getElementById('scr').scrollTop = 0;
+  if (name==='session') renderHist();
+  if (name==='progreso') updateProg();
+}
+
+// feel
+function feel(btn, val) {
+  document.querySelectorAll('.feel-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  S.feel = val;
+}
+
+// save session
+const tipoMap = {enduro:'🏔 Enduro',z2:'🔄 Zona 2',hiit:'⚡ HIIT',recovery:'🧘 Recovery',race:'🏁 Race',climb:'🪨 Subida'};
+const feelMap = {mal:'😵',regular:'😐',bien:'💪',epic:'🔥'};
+
+function saveSession() {
+  const km = parseFloat(document.getElementById('f-km').value)||0;
+  const min = parseFloat(document.getElementById('f-min').value)||0;
+  if (!km && !min) { toast('⚠️ Añade al menos km o duración'); return; }
+  const sess = {
+    id: Date.now(),
+    date: now.toLocaleDateString('es-ES'),
+    tipo: document.getElementById('f-tipo').value,
+    km, min,
+    dsn: parseFloat(document.getElementById('f-dsn').value)||0,
+    fc: parseFloat(document.getElementById('f-fc').value)||0,
+    notas: document.getElementById('f-notas').value,
+    feel: S.feel||'bien',
+    kcal: Math.round(min*8.5)
+  };
+  S.sessions.unshift(sess);
+  localStorage.setItem('mtb_s', JSON.stringify(S.sessions));
+  ['f-km','f-min','f-dsn','f-fc','f-notas'].forEach(id => document.getElementById(id).value='');
+  document.querySelectorAll('.feel-btn').forEach(b => b.classList.remove('sel'));
+  S.feel = null;
+  const ok = document.getElementById('save-ok');
+  ok.style.display = 'block';
+  setTimeout(() => ok.style.display='none', 2500);
+  updateMetrics();
+  renderHist();
+}
+
+function renderHist() {
+  const el = document.getElementById('hist-list');
+  if (!S.sessions.length) {
+    el.innerHTML = '<p style="color:var(--text3);font-size:13px;text-align:center;padding:16px 0;font-weight:500">Aún no hay sesiones guardadas</p>';
+    return;
+  }
+  el.innerHTML = S.sessions.slice(0,5).map(s => `
+    <div class="sess-card" style="margin-bottom:8px">
+      <div class="sess-top">
+        <div class="sess-name">${tipoMap[s.tipo]||s.tipo}</div>
+        <span style="font-size:20px">${feelMap[s.feel]||'💪'}</span>
+      </div>
+      <div class="sess-stats">
+        ${s.km?`<span class="ss"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#7ab4ff" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6l9-3 9 3M3 18l9 3 9-3"/></svg>${s.km} km</span>`:''}
+        ${s.min?`<span class="ss"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#7ab4ff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${s.min} min</span>`:''}
+        ${s.dsn?`<span class="ss"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#7ab4ff" stroke-width="2" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>${s.dsn} m</span>`:''}
+        <span class="ss" style="color:var(--text3)">${s.date}</span>
+      </div>
+      ${s.notas?`<div style="color:var(--text3);font-size:12px;margin-top:8px;font-weight:500">${s.notas}</div>`:''}
+    </div>`).join('');
+}
+
+// metrics
+function updateMetrics() {
+  const tot = S.sessions.reduce((a,s)=>({km:a.km+(s.km||0),dsn:a.dsn+(s.dsn||0),min:a.min+(s.min||0),kcal:a.kcal+(s.kcal||0)}),{km:0,dsn:0,min:0,kcal:0});
+  const km = 234+tot.km, dsn = 4230+tot.dsn, hrs = ((1110+tot.min)/60), kcal = 12840+tot.kcal;
+  const pct = Math.min(100, Math.round(km/300*100));
+  document.getElementById('h-km').textContent = km;
+  document.getElementById('h-prog').style.width = pct+'%';
+  document.getElementById('h-dsn').textContent = dsn.toLocaleString();
+  document.getElementById('h-hrs').textContent = hrs.toFixed(1);
+  document.getElementById('h-kcal').textContent = kcal>9999?(kcal/1000).toFixed(1)+'k':kcal;
+}
+
+function updateProg() {
+  const tot = S.sessions.reduce((a,s)=>({km:a.km+(s.km||0),dsn:a.dsn+(s.dsn||0),min:a.min+(s.min||0),kcal:a.kcal+(s.kcal||0)}),{km:0,dsn:0,min:0,kcal:0});
+  document.getElementById('p-km').textContent = (234+tot.km)+' km';
+  document.getElementById('p-dsn').textContent = (4230+tot.dsn).toLocaleString()+' m';
+  document.getElementById('p-hrs').textContent = ((1110+tot.min)/60).toFixed(1)+' h';
+  document.getElementById('p-sess').textContent = (11+S.sessions.length)+' / 14';
+  document.getElementById('p-kcal').textContent = (12840+tot.kcal).toLocaleString()+' kcal';
+}
+
+// water
+function addWater(ml) {
+  S.water = Math.min(3.0, +(S.water + ml/1000).toFixed(2));
+  localStorage.setItem('mtb_w', S.water);
+  const pct = Math.round(S.water/3*100);
+  document.getElementById('water-val').textContent = S.water.toFixed(1)+' / 3.0 L';
+  document.getElementById('water-bar').style.width = pct+'%';
+  document.getElementById('water-macro').textContent = S.water.toFixed(1)+'L';
+  toast('💧 +'+ml+'ml · Total: '+S.water.toFixed(1)+'L');
+}
+
+// toast
+function toast(msg) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// init
+updateMetrics();
+renderHist();
+
+// PWA manifest
+const mf = {name:"MTB Rider",short_name:"MTB Rider",start_url:"./",display:"standalone",background_color:"#070911",theme_color:"#070911",orientation:"portrait",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23070911'/%3E%3Crect x='20' y='20' width='472' height='472' rx='85' fill='none' stroke='%231060CC' stroke-width='8'/%3E%3Ctext x='256' y='320' font-size='260' text-anchor='middle'%3E%F0%9F%9A%B5%3C/text%3E%3C/svg%3E",sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
+const bl = new Blob([JSON.stringify(mf)],{type:'application/json'});
+const lk = document.createElement('link');
+lk.rel='manifest'; lk.href=URL.createObjectURL(bl);
+document.head.appendChild(lk);
+</script>
+</body>
+</html>
